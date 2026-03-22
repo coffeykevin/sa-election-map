@@ -6,77 +6,145 @@
 <title>SA Election 2026 — Live Results Map</title>
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
 <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Google+Sans+Text:wght@400;500;700&display=swap" rel="stylesheet" crossorigin>
 <style>
+  :root {
+    /* M3 Dark Theme Tokens */
+    --md-sys-color-surface: #1C1B1F;
+    --md-sys-color-surface-container: #211F26;
+    --md-sys-color-surface-container-high: #2B2930;
+    --md-sys-color-surface-container-highest: #36343B;
+    --md-sys-color-on-surface: #E6E1E5;
+    --md-sys-color-on-surface-variant: #CAC4D0;
+    --md-sys-color-outline: #938F99;
+    --md-sys-color-outline-variant: #49454F;
+    --md-sys-color-primary: #D0BCFF;
+    --md-sys-color-on-primary: #381E72;
+    --md-sys-color-primary-container: #4F378B;
+    --md-sys-color-tertiary: #EFB8C8;
+    --md-sys-color-error: #F2B8B5;
+    --md-sys-color-inverse-surface: #E6E1E5;
+    --md-sys-color-inverse-on-surface: #313033;
+    /* M3 Elevation */
+    --md-sys-elevation-1: 0px 1px 2px 0px rgba(0,0,0,0.3), 0px 1px 3px 1px rgba(0,0,0,0.15);
+    --md-sys-elevation-2: 0px 1px 2px 0px rgba(0,0,0,0.3), 0px 2px 6px 2px rgba(0,0,0,0.15);
+    --md-sys-elevation-3: 0px 1px 3px 0px rgba(0,0,0,0.3), 0px 4px 8px 3px rgba(0,0,0,0.15);
+    /* M3 Shape */
+    --md-sys-shape-corner-small: 8px;
+    --md-sys-shape-corner-medium: 12px;
+    --md-sys-shape-corner-large: 16px;
+    --md-sys-shape-corner-extra-large: 28px;
+  }
+
   * { box-sizing: border-box; }
-  body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #1a1a2e; }
+  body {
+    margin: 0; padding: 0;
+    font-family: 'Google Sans Text', 'Google Sans', Roboto, -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--md-sys-color-surface);
+  }
   #map { position: absolute; top: 0; bottom: 0; width: 100%; }
 
+  /* Header — M3 Surface Container with elevation 2 */
   .header {
     position: absolute; top: 0; left: 0; right: 0; z-index: 2;
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-    color: white; padding: 12px 20px;
+    background: var(--md-sys-color-surface-container);
+    color: var(--md-sys-color-on-surface);
+    padding: 14px 24px;
     display: flex; align-items: center; gap: 16px;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+    box-shadow: var(--md-sys-elevation-2);
   }
-  .header h1 { margin: 0; font-size: 18px; font-weight: 700; white-space: nowrap; }
-  .header .counted { font-size: 13px; color: #8892b0; }
+  .header h1 {
+    margin: 0; font-size: 22px; font-weight: 475;
+    font-family: 'Google Sans', sans-serif;
+    letter-spacing: 0; white-space: nowrap;
+  }
+  .header .counted {
+    font-size: 12px; font-weight: 500;
+    color: var(--md-sys-color-on-surface-variant);
+    letter-spacing: 0.5px;
+  }
 
+  /* Totals — M3 Assist Chips / Tonal Buttons */
   .totals {
     display: flex; gap: 8px; margin-left: auto; flex-wrap: wrap; justify-content: flex-end;
   }
   .total-badge {
-    display: flex; align-items: center; gap: 6px;
-    background: rgba(255,255,255,0.08); border-radius: 6px;
-    padding: 4px 10px; font-size: 13px; font-weight: 600;
+    display: flex; align-items: center; gap: 8px;
+    background: var(--md-sys-color-surface-container-high);
+    border: 1px solid var(--md-sys-color-outline-variant);
+    border-radius: var(--md-sys-shape-corner-small);
+    padding: 6px 12px; font-size: 12px; font-weight: 500;
+    letter-spacing: 0.5px;
   }
   .total-badge .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-  .total-badge .num { font-size: 18px; font-weight: 800; }
-  .majority-line { font-size: 11px; color: #f0c040; margin-left: 4px; }
+  .total-badge .num {
+    font-size: 16px; font-weight: 700;
+    font-family: 'Google Sans', sans-serif;
+  }
+  .majority-line {
+    font-size: 11px; font-weight: 500;
+    color: var(--md-sys-color-tertiary);
+    margin-left: 4px; letter-spacing: 0.5px;
+  }
 
+  /* Legend — M3 Surface Container Highest, elevation 1 */
   .legend {
     position: absolute; bottom: 30px; left: 10px; z-index: 1;
-    background: rgba(26,26,46,0.92); border-radius: 8px;
-    padding: 10px 14px; color: white; font-size: 12px;
-    backdrop-filter: blur(8px);
+    background: var(--md-sys-color-surface-container-highest);
+    border-radius: var(--md-sys-shape-corner-medium);
+    padding: 12px 16px;
+    color: var(--md-sys-color-on-surface);
+    font-size: 12px; font-weight: 500;
+    box-shadow: var(--md-sys-elevation-1);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--md-sys-color-outline-variant);
   }
-  .legend-item { display: flex; align-items: center; gap: 8px; margin: 4px 0; }
-  .legend-swatch { width: 16px; height: 16px; border-radius: 3px; flex-shrink: 0; }
+  .legend-item {
+    display: flex; align-items: center; gap: 10px; margin: 5px 0;
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: 12px; letter-spacing: 0.4px;
+  }
+  .legend-swatch {
+    width: 16px; height: 16px;
+    border-radius: 4px; flex-shrink: 0;
+  }
 
   /* Mobile responsive */
   @media (max-width: 600px) {
     .header {
       flex-direction: column; align-items: flex-start; gap: 8px;
-      padding: 10px 14px;
+      padding: 12px 16px;
     }
-    .header h1 { font-size: 15px; }
+    .header h1 { font-size: 18px; }
     .header .counted { font-size: 11px; }
-    .totals { margin-left: 0; gap: 5px; }
-    .total-badge { padding: 3px 7px; font-size: 11px; }
+    .totals { margin-left: 0; gap: 6px; }
+    .total-badge { padding: 4px 8px; font-size: 11px; }
     .total-badge .num { font-size: 14px; }
     .majority-line { display: none; }
     .legend {
       bottom: 10px; left: 6px;
-      padding: 8px 10px; font-size: 11px;
+      padding: 8px 12px; font-size: 11px;
       max-width: 160px;
     }
     .legend-swatch { width: 12px; height: 12px; }
-    .district-marker { padding: 2px 5px; }
+    .district-marker { padding: 2px 6px; }
     .district-marker .dm-name { font-size: 9px; }
     .district-marker .dm-swing { font-size: 10px; }
   }
 
+  /* Map markers — M3 Surface with elevation 1 */
   .maplibregl-marker {
     will-change: transform;
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
   }
   .district-marker {
-    background: rgba(255,255,255,0.93);
-    border-radius: 5px;
-    padding: 3px 7px;
+    background: var(--md-sys-color-inverse-surface);
+    border-radius: var(--md-sys-shape-corner-small);
+    padding: 4px 8px;
     text-align: center;
     pointer-events: none;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+    box-shadow: var(--md-sys-elevation-1);
     line-height: 1.3;
     white-space: nowrap;
     transform-origin: center center;
@@ -87,14 +155,14 @@
   }
   .district-marker .dm-name {
     font-size: 11px;
-    font-weight: 800;
+    font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    color: #222;
+    color: var(--md-sys-color-inverse-on-surface);
   }
   .district-marker .dm-swing {
-    font-size: 13px;
-    font-weight: 700;
+    font-size: 12px;
+    font-weight: 500;
     margin-top: 1px;
   }
   /* Zoom-based marker scaling */
@@ -107,36 +175,79 @@
   .district-marker .dm-swing.positive { color: #2e7d32; }
   .district-marker .dm-swing.negative { color: #c62828; }
   .district-marker.no-votes {
-    background: rgba(200,200,200,0.7);
+    background: var(--md-sys-color-surface-container-highest);
+    border: 1px solid var(--md-sys-color-outline-variant);
   }
-  .district-marker.no-votes .dm-name { color: #666; }
+  .district-marker.no-votes .dm-name { color: var(--md-sys-color-outline); }
 
-  .popup-content { font-size: 14px; line-height: 1.6; min-width: 200px; }
-  .popup-content .seat-name { font-size: 17px; font-weight: 700; margin-bottom: 4px; }
-  .popup-content .party-tag {
-    display: inline-block; padding: 2px 8px; border-radius: 4px;
-    font-weight: 700; font-size: 12px; color: white; margin-bottom: 4px;
+  /* Popup — M3 Surface Container High */
+  .popup-content {
+    font-size: 14px; line-height: 1.6; min-width: 220px;
+    font-family: 'Google Sans Text', sans-serif;
   }
-  .popup-content .status { font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: 0.5px; }
-  .popup-content .swing-line { font-size: 13px; margin-top: 4px; }
-  .popup-content .swing-arrow { font-weight: 700; }
+  .popup-content .seat-name {
+    font-size: 16px; font-weight: 500; margin-bottom: 6px;
+    font-family: 'Google Sans', sans-serif;
+  }
+  .popup-content .party-tag {
+    display: inline-block; padding: 3px 10px;
+    border-radius: 100px;
+    font-weight: 500; font-size: 11px; letter-spacing: 0.5px;
+    color: white; margin-bottom: 4px;
+  }
+  .popup-content .status {
+    font-size: 11px; color: #666;
+    text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500;
+  }
+  .popup-content .swing-line { font-size: 13px; margin-top: 6px; }
+  .popup-content .swing-arrow { font-weight: 500; }
   .popup-content .swing-to { color: #2e7d32; }
   .popup-content .swing-from { color: #c62828; }
-  .popup-content .counted-pct { font-size: 12px; color: #888; }
-  .popup-content .held-note { font-size: 11px; color: #e74c3c; font-weight: 600; margin-top: 2px; }
+  .popup-content .counted-pct { font-size: 12px; color: #888; font-weight: 400; }
+  .popup-content .held-note {
+    font-size: 11px; color: #e74c3c;
+    font-weight: 500; margin-top: 2px; letter-spacing: 0.3px;
+  }
 
+  /* Hover tooltip — M3 Surface Container, elevation 3 */
   .hover-tooltip {
     position: absolute; top: 90px; left: 10px; z-index: 1;
-    background: rgba(26,26,46,0.95); border-radius: 8px;
-    padding: 12px 20px; color: white; font-size: 18px; font-weight: 600;
-    display: none; backdrop-filter: blur(8px); pointer-events: none;
+    background: var(--md-sys-color-surface-container-highest);
+    border-radius: var(--md-sys-shape-corner-medium);
+    padding: 12px 20px;
+    color: var(--md-sys-color-on-surface);
+    font-size: 18px; font-weight: 475;
+    font-family: 'Google Sans', sans-serif;
+    display: none;
+    box-shadow: var(--md-sys-elevation-3);
+    backdrop-filter: blur(12px);
+    pointer-events: none;
+    border: 1px solid var(--md-sys-color-outline-variant);
   }
   .hover-tooltip .ht-party {
-    display: inline-block; padding: 1px 6px; border-radius: 3px;
-    font-size: 14px; font-weight: 700; color: white; margin-left: 8px;
+    display: inline-block; padding: 2px 10px;
+    border-radius: 100px;
+    font-size: 13px; font-weight: 500; letter-spacing: 0.5px;
+    color: white; margin-left: 10px;
   }
   .hover-tooltip .ht-swing {
-    font-size: 15px; font-weight: 400; margin-left: 8px; opacity: 0.8;
+    font-size: 14px; font-weight: 400; margin-left: 10px;
+    color: var(--md-sys-color-on-surface-variant);
+  }
+
+  /* M3 style MapLibre popup override */
+  .maplibregl-popup-content {
+    border-radius: var(--md-sys-shape-corner-medium) !important;
+    box-shadow: var(--md-sys-elevation-3) !important;
+    padding: 16px !important;
+    font-family: 'Google Sans Text', sans-serif !important;
+  }
+  .maplibregl-popup-close-button {
+    font-size: 18px; padding: 4px 8px;
+    color: #666; border-radius: 50%;
+  }
+  .maplibregl-popup-close-button:hover {
+    background: rgba(0,0,0,0.06);
   }
 </style>
 </head>
